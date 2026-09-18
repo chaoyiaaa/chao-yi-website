@@ -1,0 +1,6 @@
+# Local dev tooling (not part of the deployed site)
+.claude/
+serve.ps1
+
+# Third-party reference screenshot (not our content, not used by the site)
+website inspo 1.JPG
