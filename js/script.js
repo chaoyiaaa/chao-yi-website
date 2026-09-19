@@ -62,11 +62,11 @@
     revealEls.forEach((el) => el.classList.add("in-view"));
   }
 
-  /* ---------- Booking form: validation + Web3Forms submission ---------- */
+  /* ---------- Booking form: validation + StaticForms submission ---------- */
   const form = document.getElementById("bookingForm");
   const successMsg = document.getElementById("formSuccess");
   const errorMsg = document.getElementById("formError");
-  const WEB3FORMS_ACCESS_KEY = "569bc870-45b4-485e-bd3d-7a31e44f4be1";
+  const STATICFORMS_ACCESS_KEY = "sf_a1c0c80f32ef09c9ab00e750";
 
   if (form) {
     const validators = {
@@ -140,9 +140,9 @@
       const eventTypeText = eventTypeSelect.options[eventTypeSelect.selectedIndex]?.text || "";
 
       const payload = {
-        access_key: WEB3FORMS_ACCESS_KEY,
+        accessKey: STATICFORMS_ACCESS_KEY,
         subject: `Booking enquiry from ${name}`,
-        from_name: name,
+        replyTo: form.elements["email"].value.trim(),
         name,
         email: form.elements["email"].value.trim(),
         phone: form.elements["phone"].value.trim(),
@@ -158,7 +158,7 @@
       btnLabel.textContent = "Sending...";
 
       try {
-        const res = await fetch("https://api.web3forms.com/submit", {
+        const res = await fetch("https://api.staticforms.xyz/submit", {
           method: "POST",
           headers: { "Content-Type": "application/json", Accept: "application/json" },
           body: JSON.stringify(payload),
@@ -178,6 +178,110 @@
       } finally {
         submitBtn.disabled = false;
         btnLabel.textContent = "Send Enquiry";
+      }
+    });
+  }
+
+  /* ---------- Join form: validation + StaticForms submission ---------- */
+  const joinForm = document.getElementById("joinForm");
+  const joinSuccessMsg = document.getElementById("joinFormSuccess");
+  const joinErrorMsg = document.getElementById("joinFormError");
+  const JOIN_STATICFORMS_ACCESS_KEY = "sf_92a07295e3cd0e8835640d65";
+
+  if (joinForm) {
+    const joinValidators = {
+      name: (v) => v.trim().length > 1 || "Please enter your name.",
+      email: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()) || "Please enter a valid email address.",
+    };
+
+    const setJoinFieldError = (field, msg) => {
+      const wrapper = field.closest(".field");
+      const errorEl = wrapper.querySelector(".field-error");
+      if (msg) {
+        wrapper.classList.add("has-error");
+        errorEl.textContent = msg;
+      } else {
+        wrapper.classList.remove("has-error");
+        errorEl.textContent = "";
+      }
+    };
+
+    Object.keys(joinValidators).forEach((name) => {
+      const field = joinForm.elements[name];
+      field.addEventListener("blur", () => {
+        const result = joinValidators[name](field.value);
+        setJoinFieldError(field, result === true ? "" : result);
+      });
+    });
+
+    joinForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      joinSuccessMsg.hidden = true;
+      joinErrorMsg.hidden = true;
+
+      // Honeypot: real visitors never check this hidden field. If it's
+      // checked, silently drop the submission without alerting the bot.
+      if (joinForm.elements["botcheck"] && joinForm.elements["botcheck"].checked) {
+        return;
+      }
+
+      let firstInvalid = null;
+      let valid = true;
+
+      Object.keys(joinValidators).forEach((name) => {
+        const field = joinForm.elements[name];
+        const result = joinValidators[name](field.value);
+        if (result !== true) {
+          valid = false;
+          setJoinFieldError(field, result);
+          if (!firstInvalid) firstInvalid = field;
+        } else {
+          setJoinFieldError(field, "");
+        }
+      });
+
+      if (!valid) {
+        if (firstInvalid) firstInvalid.focus();
+        return;
+      }
+
+      const name = joinForm.elements["name"].value.trim();
+
+      const payload = {
+        accessKey: JOIN_STATICFORMS_ACCESS_KEY,
+        subject: `Membership enquiry from ${name}`,
+        replyTo: joinForm.elements["email"].value.trim(),
+        name,
+        email: joinForm.elements["email"].value.trim(),
+        message: joinForm.elements["message"].value.trim(),
+      };
+
+      const submitBtn = joinForm.querySelector("button[type='submit']");
+      const btnLabel = submitBtn.querySelector(".btn-label");
+      submitBtn.disabled = true;
+      btnLabel.textContent = "Sending...";
+
+      try {
+        const res = await fetch("https://api.staticforms.xyz/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const result = await res.json();
+
+        if (result.success) {
+          joinSuccessMsg.hidden = false;
+          joinSuccessMsg.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          joinForm.reset();
+        } else {
+          throw new Error(result.message || "Submission failed");
+        }
+      } catch (err) {
+        joinErrorMsg.hidden = false;
+        joinErrorMsg.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      } finally {
+        submitBtn.disabled = false;
+        btnLabel.textContent = "Enquire About Joining";
       }
     });
   }

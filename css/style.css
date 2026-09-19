@@ -96,8 +96,25 @@ h1, h2, h3, p { margin: 0; }
    Section shells
    ========================================================================== */
 .section { padding: var(--space-6) 0; position: relative; }
+.section > .container { position: relative; z-index: 1; }
 .about, .gallery, .sponsors, .contact { background: var(--c-black); }
-.book, .join { background: #00510B; background-image: linear-gradient(160deg, #00510B 0%, #001C04 55%, #000000 100%); }
+.book, .join { background: #00510B; background-image: linear-gradient(160deg, #00510B 0%, #001C04 55%, #000000 100%); overflow: hidden; }
+
+.book::before, .join::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -6%;
+  width: 52%;
+  height: 100%;
+  background-image: url("../assets/images/dragon-bg.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  opacity: 0.16;
+  pointer-events: none;
+  z-index: 0;
+}
 
 .section-kicker {
   display: inline-block;
@@ -417,14 +434,10 @@ p + p { margin-top: var(--space-3); }
 .process-step strong { display: block; margin-bottom: 2px; }
 .process-step span { color: rgba(255,255,255,0.7); font-size: 14.5px; }
 
-.contact-inline { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-5); }
-.contact-inline a, .contact-inline span { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; color: var(--c-gold); }
-.contact-inline a:hover { color: var(--c-gold-light); }
-
 .book-form {
   position: relative;
-  background: var(--c-surface);
-  border: 1px solid var(--c-line);
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.16);
   border-radius: var(--radius-lg);
   padding: var(--space-5);
 }
@@ -556,13 +569,13 @@ button.gallery-item:hover::after { opacity: 1; }
   border-radius: var(--radius-lg);
   padding: var(--space-5) var(--space-6);
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   gap: var(--space-4);
-  flex-wrap: wrap;
 }
 .join-cta h3 { font-family: var(--f-display); font-weight: 400; font-size: 26px; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 10px; }
 .join-cta p { color: rgba(255,255,255,0.75); margin: 0; }
+.join-form { display: flex; flex-direction: column; gap: var(--space-3); max-width: 560px; }
+.join-form .btn-block { margin-top: var(--space-1); }
 
 /* ==========================================================================
    Sponsors
@@ -693,7 +706,7 @@ button.gallery-item:hover::after { opacity: 1; }
 
 @media (max-width: 900px) {
   .about-grid, .book-grid, .contact-grid { grid-template-columns: 1fr; }
-  .about-grid { gap: var(--space-4); }
+  .about-grid, .book-grid, .contact-grid { gap: var(--space-5); }
   /* Unwrap the desktop-only column groupings so heading, paragraph, image
      and values can each be reordered independently in the single-column
      stack (image now follows the paragraph instead of leading). */
@@ -703,6 +716,28 @@ button.gallery-item:hover::after { opacity: 1; }
   .about-media { order: 3; }
   .about-extra { order: 4; }
   .about-media img { height: 380px; }
+
+  /* Let the dragon watermark scale up much larger on mobile/tablet —
+     sized relative to viewport height so it reads as a bold graphic
+     near the top of the section. Fine for it to bleed off the edge
+     and get clipped. */
+  .book::before, .join::before {
+    top: 0;
+    right: -30%;
+    width: 90%;
+    height: 55vh;
+    opacity: 0.2;
+  }
+}
+
+/* Tablet range only — same floor as the site's other tablet-specific
+   overrides. */
+@media (min-width: 601px) and (max-width: 900px) {
+  .book::before, .join::before {
+    right: -8%;
+    width: 70%;
+    height: 75vh;
+  }
 }
 
 @media (max-width: 860px) {
@@ -742,7 +777,6 @@ button.gallery-item:hover::after { opacity: 1; }
   .sponsors-row { grid-template-columns: repeat(2, 1fr); }
   .gallery-grid { grid-template-columns: repeat(2, 1fr); grid-auto-rows: 160px; }
   .gallery-item-tall { grid-row: span 2; }
-  .join-cta { flex-direction: column; align-items: flex-start; }
   .section { padding: var(--space-5) 0; }
   .section-head { flex-direction: column; align-items: flex-start; gap: 0; }
 }
