@@ -8,3 +8,10 @@ website inspo 1.JPG
 # Raw source art (large, unused by the site — assets/images/dragon-bg.png
 # is the processed version actually referenced in CSS)
 dragonbackground.png
+
+# Raw source photos (large, unprocessed — assets/images/gallery-lion-*.jpg
+# are the resized/compressed versions actually used in the gallery)
+Lion 1.jpg
+Lion 2.jpg
+Lion 3.jpg
+Lion 4.jpg
